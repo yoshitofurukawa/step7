@@ -40,7 +40,7 @@
 
                     <div class="row mt-3">
                         <div class="col-md-8 offset-md-4">
-                            <button type="submit" class="btn btn-primary"　href="http://localhost/step7/public/register">
+                            <button type="submit" class="btn btn-primary" href="http://localhost/step7/public/register">
                                 {{ __('新規登録') }}
                             </button>
                         </div>

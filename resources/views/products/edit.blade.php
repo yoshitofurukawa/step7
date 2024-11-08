@@ -1,14 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
+@if ($errors->any())
+    <div class="error">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <a href="{{ route('products.index') }}" class="btn btn-primary mt-1 mb-3">商品一覧画面に戻る</a>
+
                 <div class="card">
-                    <div class="card-header"><h2>商品情報を変更する</h2></div>
+                    <div class="card-header"><h2>商品情報編集画面</h2></div>
 
                     <div class="card-body">
+                    <dl class="row mt-3" >
+                        <dt class="col-sm-3">ID.</dt>
+                        <dd class="col-sm-9">{{ $product->id }}.</dd>
+                    </dl>
                     <form method="POST" action="{{ route('products.update', ['product' => $product->id]) }}" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
@@ -45,11 +58,12 @@
                             <div class="mb-3">
                                 <label for="img_path" class="form-label">商品画像</label>
                                 <input id="img_path" type="file" name="img_path" class="form-control" required>
-                                <img src="{{ asset($product->img_path) }}" alt="商品画像" class="product-image">
+
                             </div>
 
-                            <button type="submit" class="btn btn-primary">更新</button>
+                            <button type="submit" class="btn btn-primary btn-sm mx-1">更新</button>
                         </form>
+                        <a href="{{ route('products.index') }}" class="btn btn-outline-info btn-sm mx-1">商品一覧画面に戻る</a>
                     </div>
                 </div>
             </div>

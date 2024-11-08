@@ -5,15 +5,58 @@ namespace App\Http\Controllers;
 use App\Models\Product; 
 use App\Models\Company; 
 use Illuminate\Http\Request; 
+use App\Http\Requests\ProductRequest;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller 
 {
     
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::paginate(10);
+            // Productモデルに基づいてクエリビルダを初期化
+    $query = Product::query();
+    // この行の後にクエリを逐次構築していきます。
+    // そして、最終的にそのクエリを実行するためのメソッド（例：get(), first(), paginate() など）を呼び出すことで、データベースに対してクエリを実行します。
 
-        return view('products.index', compact('products'));
+    // 商品名の検索キーワードがある場合、そのキーワードを含む商品をクエリに追加
+    if($search = $request->search){
+        $query->where('product_name', 'LIKE', "%{$search}%");
+    }
+
+    /*
+    最小価格が指定されている場合、その価格以上の商品をクエリに追加
+    if($min_price = $request->min_price){
+        $query->where('price', '>=', $min_price);
+    }
+
+    // 最大価格が指定されている場合、その価格以下の商品をクエリに追加
+    if($max_price = $request->max_price){
+        $query->where('price', '<=', $max_price);
+    }
+
+    // 最小在庫数が指定されている場合、その在庫数以上の商品をクエリに追加
+    if($min_stock = $request->min_stock){
+        $query->where('stock', '>=', $min_stock);
+    }
+
+    // 最大在庫数が指定されている場合、その在庫数以下の商品をクエリに追加
+    if($max_stock = $request->max_stock){
+        $query->where('stock', '<=', $max_stock);
+    }
+    */
+    if($company_id = $request->company_id){
+        $query->where('company_id', $company_id);
+    }
+    
+    // 上記の条件(クエリ）に基づいて商品を取得し、10件ごとのページネーションを適用
+    $products = $query->paginate(10);
+    $companies = Company::all();
+    // 商品一覧ビューを表示し、取得した商品情報をビューに渡す
+    return view('products.index', compact('products','companies'));
+
+
+        //$product = Product::all();
+        //return view('products.index', compact('products','companies','product'));
     }
 
 
@@ -25,19 +68,11 @@ class ProductController extends Controller
         return view('products.create', compact('companies'));
     }
 
-    public function store(Request $request) 
+    public function store(ProductRequest $request) 
     {
-        $request->validate([
-            'product_name' => 'required', 
-            'company_id' => 'required',
-            'price' => 'required',
-            'stock' => 'required',
-            'comment' => 'nullable', 
-            'img_path' => 'nullable|image|max:2048',
-        ]);
-        
+        DB::beginTransaction();
 
-
+    try {
         $product = new Product([
             'product_name' => $request->get('product_name'),
             'company_id' => $request->get('company_id'),
@@ -66,6 +101,12 @@ class ProductController extends Controller
         // 作成したデータベースに新しいレコードとして保存します。
         $product->save();
 
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            info($e->getMessage()); 
+        }
+
         // 全ての処理が終わったら、商品一覧画面に戻ります。
         return redirect('products');
     }
@@ -89,16 +130,12 @@ class ProductController extends Controller
         return view('products.edit', compact('product', 'companies'));
     }
 
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
         // リクエストされた情報を確認して、必要な情報が全て揃っているかチェックします。
-        $request->validate([
-            'product_name' => 'required',
-            'price' => 'required',
-            'stock' => 'required',
-        ]);
-        //バリデーションによりフォームに未入力項目があればエラーメッセー発生させる（未入力です　など）
+        DB::beginTransaction();
 
+    try {
         // 商品の情報を更新します。
         $product->product_name = $request->product_name;
         //productモデルのproduct_nameをフォームから送られたproduct_nameの値に書き換える
@@ -115,7 +152,11 @@ class ProductController extends Controller
         // 更新した商品を保存します。
         $product->save();
         // モデルインスタンスである$productに対して行われた変更をデータベースに保存するためのメソッド（機能）です。
-
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            info($e->getMessage()); 
+        }
         // 全ての処理が終わったら、商品一覧画面に戻ります。
         return redirect()->route('products.index')
             ->with('success', 'Product updated successfully');
@@ -125,12 +166,13 @@ class ProductController extends Controller
     public function destroy(Product $product)
 //(Product $product) 指定されたIDで商品をデータベースから自動的に検索し、その結果を $product に割り当てます。
     {
-        // 商品を削除します。
-        $product->delete();
 
-        // 全ての処理が終わったら、商品一覧画面に戻ります。
-        return redirect('/products');
-        //URLの/productsを検索します
-        //products　/がなくても検索できます
+        try {
+            $product->delete();
+            return redirect()->route('products.index')->with('message', '削除されました');
+        } catch (Exception $e) {
+            return redirect()->route('products.index')->with('message', '削除中にエラーが発生しました: ' . $e->getMessage());
+        }
+
     }
 }
