@@ -35,10 +35,12 @@ class ProductRequest extends FormRequest
     public function attributes()
     {
         return [
-            'product_name' => 'required', 
-            'company_id' => 'required',
-            'price' => 'required',
-            'stock' => 'required',
+            'product_name' => '商品名', 
+            'company_id' => 'メーカー',
+            'price' => '価格',
+            'stock' => '在庫数',
+            'comment' => 'コメント', 
+            'img_path' => '画像',
         ];
     }
 
@@ -52,7 +54,9 @@ class ProductRequest extends FormRequest
             'product_name.required' => ':attributeは必須項目です。',
             'company_id.required' => ':attributeは必須項目です。',
             'price.required' => ':attributeは必須項目です。',
+            'price.numeric' => ':attributeは数字で入力してください。',
             'stock.required' => ':attributeは必須項目です。',
+            'stock.numeric' => ':attributeは数字で入力してください。',
             'img_path.max' => ':2MB以下で指定してください。',
         ];
     }
