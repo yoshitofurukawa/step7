@@ -13,37 +13,35 @@ class ProductController extends Controller
     
     public function index(Request $request)
     {
-            // Productモデルに基づいてクエリビルダを初期化
+            // クエリビルダを初期化
     $query = Product::query();
-    // この行の後にクエリを逐次構築していきます。
-    // そして、最終的にそのクエリを実行するためのメソッド（例：get(), first(), paginate() など）を呼び出すことで、データベースに対してクエリを実行します。
-
-    // 商品名の検索キーワードがある場合、そのキーワードを含む商品をクエリに追加
+    // キーワードを含む商品をクエリに追加
     if($search = $request->search){
         $query->where('product_name', 'LIKE', "%{$search}%");
     }
 
     /*
-    最小価格が指定されている場合、その価格以上の商品をクエリに追加
+    // 最小価格
     if($min_price = $request->min_price){
         $query->where('price', '>=', $min_price);
     }
 
-    // 最大価格が指定されている場合、その価格以下の商品をクエリに追加
+    // 最大価格
     if($max_price = $request->max_price){
         $query->where('price', '<=', $max_price);
     }
 
-    // 最小在庫数が指定されている場合、その在庫数以上の商品をクエリに追加
+    // 最小在庫数
     if($min_stock = $request->min_stock){
         $query->where('stock', '>=', $min_stock);
     }
 
-    // 最大在庫数が指定されている場合、その在庫数以下の商品をクエリに追加
+    // 最大在庫数
     if($max_stock = $request->max_stock){
         $query->where('stock', '<=', $max_stock);
     }
     */
+
     if($company_id = $request->company_id){
         $query->where('company_id', $company_id);
     }
@@ -54,9 +52,6 @@ class ProductController extends Controller
     // 商品一覧ビューを表示し、取得した商品情報をビューに渡す
     return view('products.index', compact('products','companies'));
 
-
-        //$product = Product::all();
-        //return view('products.index', compact('products','companies','product'));
     }
 
 
@@ -87,18 +82,7 @@ class ProductController extends Controller
             $filePath = $request->img_path->storeAs('products', $filename, 'public');
             $product->img_path = '/storage/' . $filePath;
         }
-        // $request->hasFile('img_path')は、ブラウザにアップロードされたファイルが存在しているかを確認
-        // getClientOriginalName()はアップロードしたファイル名を取得するメソッドです。
-       // storeAs('products', $filename, 'public')は
-       //  アップロードされたファイルを特定の場所に特定の名前で保存するためのメソッドです
-       //　今回はstorage/app/publicにproducts" ディレクトリが作られ保存されます
-       //'products'：これはファイルを保存するディレクトリ（フォルダ）の名前を示しています。
-       // この場合は 'products' という名前のディレクトリにファイルが保存されます。
-    //$filename：これは保存するファイルの名前を示しています。
-    // getClientOriginalName() メソッドで取得したオリジナルのファイル名がここに入ります。
-    // 'public' ファイルのアクセス権限を示しています。'public' は公開設定で、誰でもこのファイルにアクセスすることができるようになります。
-
-        // 作成したデータベースに新しいレコードとして保存します。
+        
         $product->save();
 
             DB::commit();

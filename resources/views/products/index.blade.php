@@ -13,7 +13,7 @@
     <!-- 検索のタイトル -->
     <h2>検索条件で絞り込み</h2>
     
-    <!-- 検索フォーム。GETメソッドで、商品一覧のルートにデータを送信 -->
+    <!-- 検索フォーム -->
     <form action="{{ route('products.index') }}" method="GET" class="row g-3">
 
         <!-- 商品名検索用の入力欄 -->
@@ -21,26 +21,6 @@
             <input type="text" name="search" class="form-control" placeholder="商品名" value="{{ request('search') }}">
         </div>
         
-        <!-- 最小価格の入力欄 
-        <div class="col-sm-12 col-md-2">
-            <input type="number" name="min_price" class="form-control" placeholder="最小価格" value="{{ request('min_price') }}">
-        </div>-->
-
-        <!-- 最大価格の入力欄 
-        <div class="col-sm-12 col-md-2">
-            <input type="number" name="max_price" class="form-control" placeholder="最大価格" value="{{ request('max_price') }}">
-        </div>-->
-
-        <!-- 最小在庫数の入力欄 
-        <div class="col-sm-12 col-md-2">
-            <input type="number" name="min_stock" class="form-control" placeholder="最小在庫" value="{{ request('min_stock') }}">
-        </div>-->
-
-        <!-- 最大在庫数の入力欄 
-        <div class="col-sm-12 col-md-2">
-            <input type="number" name="max_stock" class="form-control" placeholder="最大在庫" value="{{ request('max_stock') }}">
-        </div>-->
-
     <!-- メーカー名のドロップダウン -->
     <div class="col-sm-12 col-md-3">
         <select class="form-select" id="company_id" name="company_id">
@@ -55,7 +35,7 @@
         </form>
     </div>
 
-<!-- 検索条件をリセットするためのリンクボタン -->
+<!-- 検索条件をリセット -->
 <a href="{{ route('products.index') }}" class="btn btn-success mt-3">検索条件を元に戻す</a>
 
     <div class="products mt-5">
