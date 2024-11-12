@@ -20,28 +20,6 @@ class ProductController extends Controller
         $query->where('product_name', 'LIKE', "%{$search}%");
     }
 
-    /*
-    // 最小価格
-    if($min_price = $request->min_price){
-        $query->where('price', '>=', $min_price);
-    }
-
-    // 最大価格
-    if($max_price = $request->max_price){
-        $query->where('price', '<=', $max_price);
-    }
-
-    // 最小在庫数
-    if($min_stock = $request->min_stock){
-        $query->where('stock', '>=', $min_stock);
-    }
-
-    // 最大在庫数
-    if($max_stock = $request->max_stock){
-        $query->where('stock', '<=', $max_stock);
-    }
-    */
-
     if($company_id = $request->company_id){
         $query->where('company_id', $company_id);
     }
@@ -82,7 +60,7 @@ class ProductController extends Controller
             $filePath = $request->img_path->storeAs('products', $filename, 'public');
             $product->img_path = '/storage/' . $filePath;
         }
-        
+
         $product->save();
 
             DB::commit();
@@ -96,33 +74,24 @@ class ProductController extends Controller
     }
 
     public function show(Product $product)
-    //(Product $product) 指定されたIDで商品をデータベースから自動的に検索し、その結果を $product に割り当てます。
     {
-        // 商品詳細画面を表示します。その際に、商品の詳細情報を画面に渡します。
         return view('products.show', ['product' => $product]);
-    //　ビューへproductという変数が使えるように値を渡している
-    // ['product' => $product]でビューでproductを使えるようにしている
-    // compact('products')と行うことは同じであるためどちらでも良い
     }
 
     public function edit(Product $product)
     {
-        // 商品編集画面で会社の情報が必要なので、全ての会社の情報を取得します。
+        // 全ての会社の情報を取得
         $companies = Company::all();
-
-        // 商品編集画面を表示します。その際に、商品の情報と会社の情報を画面に渡します。
         return view('products.edit', compact('product', 'companies'));
     }
 
     public function update(ProductRequest $request, Product $product)
     {
-        // リクエストされた情報を確認して、必要な情報が全て揃っているかチェックします。
         DB::beginTransaction();
 
     try {
-        // 商品の情報を更新します。
+        // 商品の情報を更新
         $product->product_name = $request->product_name;
-        //productモデルのproduct_nameをフォームから送られたproduct_nameの値に書き換える
         $product->company_id = $request->company_id;
         $product->price = $request->price;
         $product->stock = $request->stock;
@@ -133,15 +102,13 @@ class ProductController extends Controller
             $product->img_path = '/storage/' . $filePath;
         }
 
-        // 更新した商品を保存します。
+        // 更新した商品を保存
         $product->save();
-        // モデルインスタンスである$productに対して行われた変更をデータベースに保存するためのメソッド（機能）です。
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
             info($e->getMessage()); 
         }
-        // 全ての処理が終わったら、商品一覧画面に戻ります。
         return redirect()->route('products.index')
             ->with('success', 'Product updated successfully');
         // ビュー画面にメッセージを代入した変数(success)を送ります
