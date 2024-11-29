@@ -13,21 +13,51 @@ class ProductController extends Controller
     
     public function index(Request $request)
     {
-            // クエリビルダを初期化
+    // クエリビルダを初期化
     $query = Product::query();
-    // キーワードを含む商品をクエリに追加
+    // 商品名検索クエリに追加
     if($search = $request->search){
         $query->where('product_name', 'LIKE', "%{$search}%");
     }
+    // 最小価格指定クエリに追加
+    if($min_price = $request->min_price){
+        $query->where('price', '>=', $min_price);
+    }
 
+    // 最大価格指定クエリに追加
+    if($max_price = $request->max_price){
+        $query->where('price', '<=', $max_price);
+    }
+
+    // 最小在庫数指定クエリに追加
+    if($min_stock = $request->min_stock){
+        $query->where('stock', '>=', $min_stock);
+    }
+
+    // 最大在庫数指定クエリに追加
+    if($max_stock = $request->max_stock){
+        $query->where('stock', '<=', $max_stock);
+    }
+
+    // メーカー名検索用
     if($company_id = $request->company_id){
         $query->where('company_id', $company_id);
     }
+    // ソート機能
+    if($sort = $request->sort){
+        $direction = $request->direction == 'desc' ? 'desc' : 'asc'; // directionがdescでない場合は、デフォルトでascとする
+        $query->orderBy($sort, $direction);
+    }
     
-    // 上記の条件(クエリ）に基づいて商品を取得し、10件ごとのページネーションを適用
+    // ページネーション
     $products = $query->paginate(10);
+    
+    if ($request->ajax()) {
+        return view('products.index', compact('products'))->renderSections()['content'];
+    }
+
     $companies = Company::all();
-    // 商品一覧ビューを表示し、取得した商品情報をビューに渡す
+    // ビューに渡す
     return view('products.index', compact('products','companies'));
 
     }
@@ -115,15 +145,14 @@ class ProductController extends Controller
     }
 
     public function destroy(Product $product)
-//(Product $product) 指定されたIDで商品をデータベースから自動的に検索し、その結果を $product に割り当てます。
     {
-
         try {
             $product->delete();
-            return redirect()->route('products.index')->with('message', '削除されました');
-        } catch (Exception $e) {
-            return redirect()->route('products.index')->with('message', '削除中にエラーが発生しました: ' . $e->getMessage());
+            return response()->json(['message' => '削除されました'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => '削除中にエラーが発生しました: ' . $e->getMessage()], 500);
         }
-
     }
+    
+
 }
