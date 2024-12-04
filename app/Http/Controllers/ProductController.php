@@ -51,12 +51,14 @@ class ProductController extends Controller
     
     // ページネーション
     $products = $query->paginate(10);
-    
-    if ($request->ajax()) {
-        return view('products.index', compact('products'))->renderSections()['content'];
-    }
-
     $companies = Company::all();
+
+    if ($request->ajax()) {
+        // 部分ビューの内容だけを返す
+        $html = view('products.index-content', compact('products'))->render();
+        return response()->json(['html' => $html]);
+    }
+    
     // ビューに渡す
     return view('products.index', compact('products','companies'));
 
